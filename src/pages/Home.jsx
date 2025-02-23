@@ -3,11 +3,13 @@ import { Link } from "react-router-dom";
 import { API_KEY, BASE_URL, PLACEHOLDER_IMAGE, LOGO_IMAGE } from "../constants";
 import axios from "axios";
 import "./Home.css";
+import { FaSyncAlt } from "react-icons/fa"; // 아이콘 추가
 
 const Home = () => {
   const [movies, setMovies] = useState([]);
+  const [randomMovies, setRandomMovies] = useState([]);
+  const [upcomingMovies, setUpcomingMovies] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetchMovies();
@@ -30,13 +32,14 @@ const Home = () => {
 
       const results = response.data.Data?.[0]?.Result || [];
       setMovies(results);
+      setRandomMovies(getRandomMovies(results, 5));
+      setUpcomingMovies(getUpcomingMovies(results, 5));
       console.log("전체 영화 수:", results.length);
     } catch (error) {
       console.error("영화 정보를 불러오는 데 실패했습니다:", error);
     } finally {
       setLoading(false);
     }
-
   };
 
   const getPosterUrl = (posters) => {
@@ -73,7 +76,7 @@ const Home = () => {
       );
       return releaseDate > today;
     });
-    
+
     const moviesWithPosters = futureMovies.filter((movie) =>
       hasValidPoster(movie)
     );
@@ -86,6 +89,10 @@ const Home = () => {
       .slice(0, count);
   };
 
+  const handleRefresh = () => {
+    setRandomMovies(getRandomMovies(movies, 5));
+  };
+
   if (loading) {
     return (
       <div className="loading-spinner">
@@ -95,15 +102,17 @@ const Home = () => {
     );
   }
 
-  const randomMovies = getRandomMovies(movies, 5);
-  const upcomingMovies = getUpcomingMovies(movies, 5);
-
   return (
     <div className="main-container">
       <h1 className="main-title">영화 추천 목록</h1>
 
       <div className="movies-section">
-        <h2>맞춤 영화 추천</h2>
+        <div className="section-header">
+          <h2>맞춤 영화 추천</h2>
+          <button className="refresh-button" onClick={handleRefresh}>
+            <FaSyncAlt />
+          </button>
+        </div>
         <div className="movies-grid">
           {randomMovies.map((movie) => (
             <div key={movie.movieSeq} className="movie-card">
@@ -116,9 +125,8 @@ const Home = () => {
                     e.target.src = LOGO_IMAGE;
                   }}
                 />
-                {/* <h2 className="movie-title">{movie.title || "제목 없음"}</h2> */}
+                <div className="movie-title">{movie.title || "제목 없음"}</div>
               </Link>
-              <div className="movie-title">{movie.title || "제목 없음"}</div>
             </div>
           ))}
         </div>
@@ -138,9 +146,8 @@ const Home = () => {
                     e.target.src = LOGO_IMAGE;
                   }}
                 />
-                {/* <h2 className="movie-title">{movie.title || "제목 없음"}</h2> */}
+                <div className="movie-title">{movie.title || "제목 없음"}</div>
               </Link>
-              <div className="movie-title">{movie.title || "제목 없음"}</div>
             </div>
           ))}
         </div>
