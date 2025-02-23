@@ -1,0 +1,10 @@
+.loginCallback-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loginCallback-container h1 {
+    margin-top: 20rem;
+    text-align: center;
+}
